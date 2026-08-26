@@ -2,17 +2,33 @@
 
 ## Descripción del Proyecto
 
-Este proyecto implementa un ecosistema de automatización basado en Inteligencia Artificial para la gestión y clasificación de correos electrónicos mediante n8n, Gmail, OpenAI GPT-4o-mini y Airtable.
+Sistema de automatización inteligente desarrollado con n8n, Gmail, OpenAI GPT-4o-mini y Airtable para la gestión, clasificación y seguimiento de correos electrónicos mediante Inteligencia Artificial.
 
-El objetivo es automatizar la recepción, clasificación, priorización y gestión de solicitudes recibidas por correo electrónico, incorporando mecanismos de supervisión humana (Human-in-the-Loop) y gestión de errores (Resiliencia).
+El proyecto implementa:
+
+- Automatización de recepción de correos.
+- Clasificación mediante IA.
+- Registro y seguimiento en Airtable.
+- Human-in-the-Loop (aprobación humana).
+- Gestión centralizada de errores.
+- Dashboard de monitoreo y control.
 
 ---
 
-# Arquitectura General
+# Tecnologías Utilizadas
 
-El sistema está compuesto por dos workflows principales:
+- n8n
+- Gmail
+- OpenAI GPT-4o-mini
+- Airtable
+- GitHub
+- Lucidchart
 
-## Workflow Operativo
+---
+
+# Arquitectura del Sistema
+
+## Workflow Principal
 
 WF_ATENCION_CLIENTE_IA
 
@@ -34,13 +50,13 @@ SOLICITAR_APROBACION_HUMANA
 APPROVE / DECLINE
 ```
 
-Funciones principales:
+### Funciones
 
 - Recepción de correos desde Gmail.
-- Normalización de datos.
+- Formateo y normalización de datos.
 - Clasificación mediante OpenAI.
-- Almacenamiento en Airtable.
-- Validación humana previa.
+- Registro de información en Airtable.
+- Supervisión humana antes de continuar el proceso.
 
 ---
 
@@ -56,65 +72,111 @@ REGISTRAR_ERROR
 LOGS_ERRORES
 ```
 
-Funciones principales:
+### Funciones
 
-- Captura automática de fallos.
-- Registro estructurado de incidencias.
-- Auditoría y trazabilidad de errores.
+- Captura automática de errores.
+- Registro centralizado de incidencias.
+- Auditoría y trazabilidad.
 
 ---
 
-# Tecnologías Utilizadas
+# Lógica del Flujo (n8n)
 
-- n8n
-- Gmail API
-- OpenAI GPT-4o-mini
-- Airtable
-- GitHub
-- Lucidchart
+La rúbrica solicita la entrega de la lógica del flujo en formato JSON.
+
+Los workflows implementados se encuentran en:
+
+```text
+workflow/
+```
+
+### Workflow Principal
+
+Archivo:
+
+```text
+workflow/WF_ATENCION_CLIENTE_IA.json
+```
+
+Contiene:
+
+- Trigger de revisión de correo.
+- Integración Gmail.
+- Procesamiento OpenAI.
+- Escritura en Airtable.
+- Human-in-the-Loop.
+
+---
+
+### Workflow de Gestión de Errores
+
+Archivo:
+
+```text
+workflow/WF_ERROR_HANDLER.json
+```
+
+Contiene:
+
+- Error Trigger.
+- Registro automático en Airtable.
+- Gestión centralizada de incidentes.
+
+---
+
+## Importación de Workflows
+
+Para reutilizar los workflows:
+
+1. Abrir n8n.
+2. Seleccionar Import Workflow.
+3. Importar el archivo JSON correspondiente.
+4. Configurar las credenciales:
+   - Gmail
+   - OpenAI
+   - Airtable
+5. Activar los workflows.
 
 ---
 
 # Human-in-the-Loop
 
-El sistema incorpora validación humana mediante:
+Se implementó utilizando:
 
 ```text
 Send and Wait for Response
 ```
 
-Opciones disponibles:
+Opciones:
 
 - Approve
 - Decline
 
-La ejecución se detiene hasta recibir una decisión humana.
+La ejecución permanece detenida hasta recibir una decisión humana.
 
 Objetivos:
 
-- Evitar respuestas automáticas sin supervisión.
-- Incrementar la calidad de las decisiones.
-- Reducir riesgos operativos.
+- Validación humana.
+- Reducción de errores.
+- Control operativo.
 
 ---
 
 # Gestión de Errores (Resiliencia)
 
-Se implementó un workflow independiente:
+Workflow:
 
 ```text
 WF_ERROR_HANDLER
 ```
 
-activado mediante:
+Configuración:
 
 ```text
 Error Trigger
-```
-
-Los errores son almacenados en:
-
-```text
+↓
+Airtable
+↓
 Logs_Errores
 ```
 
@@ -167,7 +229,7 @@ Campos principales:
 
 # Dashboard de Control
 
-KPIs implementados:
+KPIs definidos:
 
 - Total Interacciones
 - Total Errores
@@ -178,92 +240,86 @@ KPIs implementados:
 Fórmula:
 
 ```text
-Tasa de Error (%) =
+Tasa Error (%) =
 (Total Errores / Total Interacciones) * 100
 ```
 
-## Limitación de licencia
+## Limitación de Licencia
 
-La licencia utilizada de Airtable no permite publicar la interfaz Dashboard mediante la opción "Compartir en la Web".
+La licencia utilizada de Airtable no permite publicar la interfaz mediante la opción "Compartir en la Web".
 
-Por este motivo se adjuntan:
+Por este motivo se incluyen:
 
-- Evidencias visuales del dashboard.
+- Evidencias del dashboard.
 - Shared Views cuando estén disponibles.
-- Capturas de respaldo dentro del repositorio.
+- Capturas de respaldo en el repositorio.
+
+---
+
+# Documentación Incluida
+
+Carpeta:
+
+```text
+documentos/
+```
+
+Contenido:
+
+- Arquitectura_Sistema.pdf
+- Manual_Operativo_Datos.pdf
+- Matriz_Costos.pdf
+- Seguridad_Resiliencia.pdf
+- Dashboard_Control.pdf
+
+---
+
+# Evidencias
+
+Carpeta:
+
+```text
+evidencias/
+```
+
+Contenido:
+
+- flujo_n8n.png
+- human_in_the_loop.png
+- error_handler.png
+- error_logs.png
+- dashboard_kpi.png
 
 ---
 
 # Estructura del Repositorio
 
 ```text
-docs/
+Entrega_Final_Ecosistema_IA
 │
-├── Arquitectura_Sistema.pdf
-├── Manual_Operativo_Datos.pdf
-├── Matriz_Costos.pdf
-├── Seguridad_Resiliencia.pdf
-└── Dashboard_Control.pdf
-
-workflow/
+├── documentos/
+│   ├── Arquitectura_Sistema.pdf
+│   ├── Manual_Operativo_Datos.pdf
+│   ├── Matriz_Costos.pdf
+│   ├── Seguridad_Resiliencia.pdf
+│   └── Dashboard_Control.pdf
 │
-├── WF_ATENCION_CLIENTE_IA.json
-└── WF_ERROR_HANDLER.json
-
-evidencias/
+├── workflow/
+│   ├── WF_ATENCION_CLIENTE_IA.json
+│   └── WF_ERROR_HANDLER.json
 │
-├── flujo_n8n.png
-├── human_in_the_loop.png
-├── error_handler.png
-├── error_logs.png
-└── dashboard_kpi.png
-
-enlaces/
+├── evidencias/
+│   ├── flujo_n8n.png
+│   ├── human_in_the_loop.png
+│   ├── error_handler.png
+│   ├── error_logs.png
+│   └── dashboard_kpi.png
 │
-└── enlaces.md
+├── enlaces/
+│   └── enlaces.md
+│
+└── README.md
 ```
-
----
-
-# Documentación Incluida
-
-## Arquitectura
-
-Documento PDF con:
-
-- Triggers
-- APIs
-- Nodos de IA
-- Router de aprobación
-- Destinos de datos
-- Workflow de errores
-
-## Manual Operativo de Datos
-
-Incluye:
-
-- Esquema de tablas Airtable
-- Estructuras JSON
-- Flujo de datos entre sistemas
-
-## Matriz de Costos
-
-Justificación de selección de modelos:
-
-- GPT-4o-mini
-- Claude Sonnet (referencia)
-- Batch API (propuesta)
-
-Incluye simulación de ahorro estimado.
-
-## Seguridad y Resiliencia
-
-Incluye:
-
-- Minimización de datos
-- Human-in-the-Loop
-- Error Handlers
-- Auditoría de errores
 
 ---
 
@@ -271,7 +327,6 @@ Incluye:
 
 Julio Enrique Rodríguez Angulo
 
-Proyecto académico desarrollado para la entrega final del módulo:
+Proyecto desarrollado para la entrega final:
 
 **Ecosistema IA Autónomo para Atención de Clientes**
-``
