@@ -1,0 +1,592 @@
+{
+  "name": "WF_ATENCION_CLIENTE_IA",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 1
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -640,
+        -32
+      ],
+      "id": "a652fd5e-628c-4e48-89de-761676290d38",
+      "name": "TRG_REVISION_CORREO"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": 10,
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -352,
+        -32
+      ],
+      "id": "43309295-c09a-41b9-9010-cce8e76ee833",
+      "name": "GMAIL_OBTENER_CORREOS",
+      "webhookId": "ea611997-6aac-47bb-8410-c3856ea52135",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "ckooGgslEXKJA7Ks",
+          "name": "Gmail account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4756e67c-f678-44d1-81ba-1a1d6f9bbe48",
+              "name": "correo_id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "a25834f8-8f96-4591-831c-897010dca7b3",
+              "name": "thread_id",
+              "value": "={{ $json.threadId}}",
+              "type": "string"
+            },
+            {
+              "id": "51249a57-5a42-45fc-89cd-0826233b5293",
+              "name": "mensaje",
+              "value": "={{ $json.snippet }}",
+              "type": "string"
+            },
+            {
+              "id": "92666610-5206-4ff7-b2a7-42d768c85932",
+              "name": "fecha",
+              "value": "={{ $json.internalDate }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -160,
+        -32
+      ],
+      "id": "79f8de31-1b74-49f7-9ce5-e683dc8d7805",
+      "name": "SET_DATOS_EMAIL"
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appOwIAfHolX1vPob",
+          "mode": "list",
+          "cachedResultName": "Atencion_Cliente_IA",
+          "cachedResultUrl": "https://airtable.com/appOwIAfHolX1vPob"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl3W8BP735wYojzr",
+          "mode": "list",
+          "cachedResultName": "Interacciones",
+          "cachedResultUrl": "https://airtable.com/appOwIAfHolX1vPob/tbl3W8BP735wYojzr"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "correo_id": "={{ $json.id }}",
+            "thread_id": "={{ $json.threadId }}",
+            "mensaje": "={{ $json.snippet }}",
+            "estado": "Pendiente"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "correo_id",
+              "displayName": "correo_id",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "thread_id",
+              "displayName": "thread_id",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "mensaje",
+              "displayName": "mensaje",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "fecha",
+              "displayName": "fecha",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "estado",
+              "displayName": "estado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Pendiente",
+                  "value": "Pendiente"
+                },
+                {
+                  "name": "Procesado IA",
+                  "value": "Procesado IA"
+                },
+                {
+                  "name": "Aprobado Humado",
+                  "value": "Aprobado Humado"
+                },
+                {
+                  "name": "Respondido",
+                  "value": "Respondido"
+                },
+                {
+                  "name": "Error",
+                  "value": "Error"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "categoria_ia",
+              "displayName": "categoria_ia",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "prioridad_ia",
+              "displayName": "prioridad_ia",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Alta",
+                  "value": "Alta"
+                },
+                {
+                  "name": "Media",
+                  "value": "Media"
+                },
+                {
+                  "name": "Baja",
+                  "value": "Baja"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "respuesta_ia",
+              "displayName": "respuesta_ia",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        624,
+        -32
+      ],
+      "id": "fdb3dba8-5f71-4d2b-a13a-b958ffd45308",
+      "name": "AIRTABLE_GUARDAR_INTERACCION",
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "A4FVREKakwO2TcWz",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "abd52a69-cf18-4010-9ecf-5cd55a3c3cb4",
+              "name": "fecha_formateada",
+              "value": "={{ new Date(Number($json.internalDate)).toISOString() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        48,
+        -32
+      ],
+      "id": "eb112fda-a7bf-484d-908e-a1164ae01e2a",
+      "name": "FORMATEAR_FECHA"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=Analiza el siguiente correo y responde ÚNICAMENTE en formato JSON válido.\n\nCorreo:\n{{ $json.snippet }}\n\nDebes devolver:\n\n{\n  \"categoria_ia\":\"\",\n  \"prioridad_ia\":\"\",\n  \"respuesta_ia\":\"\"\n}\n\nReglas:\n\n- categoria_ia debe ser una de:\n  Soporte\n  Consulta\n  Comercial\n  Reclamo\n\n- prioridad_ia debe ser:\n  Alta\n  Media\n  Baja\n\n- respuesta_ia debe ser una respuesta profesional breve.\n- No agregues texto fuera del JSON."
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        272,
+        -32
+      ],
+      "id": "0e8086c8-a3d7-4840-b5bd-3f6bafc1004f",
+      "name": "OPENAI_ANALIZAR_CORREO",
+      "credentials": {
+        "openAiApi": {
+          "id": "FfAlaLM9Zq9cDDuX",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "sendTo": "thelordofthejulio@gmail.com",
+        "subject": "=APROBACIÓN REQUERIDA - Atención Cliente IA",
+        "message": "=Solicitud de aprobación humana\n\nCorreo id: {{ $('TRG_REVISION_CORREO').item.json['Readable date'] }}\n\nId Del hilo: {{ $('TRG_REVISION_CORREO').item.json['Day of week'] }}\n\nEstado: {{ $('TRG_REVISION_CORREO').item.json['Readable time'] }}\n\nMensaje: \n{{ $('TRG_REVISION_CORREO').item.json.timestamp }}\n\nPor favor revisar la información antes de continuar con el proceso.",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        848,
+        -32
+      ],
+      "id": "defb89f7-8394-42f4-b043-97c32a890c6e",
+      "name": "SOLICITAR_APROBACION_HUMANA",
+      "webhookId": "1acc3fd9-faee-48ed-9204-8c1224c5f82f",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "ckooGgslEXKJA7Ks",
+          "name": "Gmail account 3"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "AIRTABLE_GUARDAR_INTERACCION": [
+      {
+        "json": {
+          "id": "rec8wOiAlh1EN6LsF",
+          "createdTime": "2026-08-20T00:40:07.000Z",
+          "fields": {
+            "thread_id": "1a01c7b4717152f7",
+            "estado": "Pendiente",
+            "correo_id": "1a01c7b4717152f7",
+            "mensaje": "Has permitido que n8n.cloud acceda a algunos datos de tu cuenta de Google thelordofthejulio@gmail.com Si no has permitido que n8n.cloud acceda a algunos de los datos de tu cuenta de Google, puede que"
+          }
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "id": "recTkBrxkvLSlOi1b",
+          "createdTime": "2026-08-20T00:40:08.000Z",
+          "fields": {
+            "thread_id": "1a01c6a4b3d1e420",
+            "estado": "Pendiente",
+            "correo_id": "1a01c6a4b3d1e420",
+            "mensaje": "¡Felicidades! Obtén tu regalo de ARS50.000 ahora! ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌"
+          }
+        },
+        "pairedItem": {
+          "item": 1
+        }
+      },
+      {
+        "json": {
+          "id": "recvNN04pnLhXNxN2",
+          "createdTime": "2026-08-20T00:40:09.000Z",
+          "fields": {
+            "thread_id": "1a01bcda15ee02cf",
+            "estado": "Pendiente",
+            "correo_id": "1a01bcda15ee02cf",
+            "mensaje": "Thousands of spam calls are reported every day. Is your Truecaller Protection up to date? Stay protected Hi Julio Enrique! Looks like Truecaller hasn't been active on your device. That means"
+          }
+        },
+        "pairedItem": {
+          "item": 2
+        }
+      },
+      {
+        "json": {
+          "id": "recw0Ldo4VFrKM8H2",
+          "createdTime": "2026-08-20T00:40:09.000Z",
+          "fields": {
+            "thread_id": "1a01bc5d528894d9",
+            "estado": "Pendiente",
+            "correo_id": "1a01bc5d528894d9",
+            "mensaje": "Julio En..., ¡obtuviste el mayor beneficio del día! Llévate 3 productos por ARS10.000. ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏ ‌ ͏"
+          }
+        },
+        "pairedItem": {
+          "item": 3
+        }
+      },
+      {
+        "json": {
+          "id": "rec14myc0ONUSLMjM",
+          "createdTime": "2026-08-20T00:40:10.000Z",
+          "fields": {
+            "thread_id": "1a01b9fa81588489",
+            "estado": "Pendiente",
+            "correo_id": "1a01b9fa81588489",
+            "mensaje": "¡Gracias por tu compra! Hola, Martin. Cuando se confirme tu pago daremos curso a tu pedido. Estamos procesando tu pago. Para que tu compra sea más segura es posible que te contacten telefónicamente"
+          }
+        },
+        "pairedItem": {
+          "item": 4
+        }
+      },
+      {
+        "json": {
+          "id": "recsrmBRCpaYREnlb",
+          "createdTime": "2026-08-20T00:40:10.000Z",
+          "fields": {
+            "thread_id": "1a01b9fa405dee7d",
+            "estado": "Pendiente",
+            "correo_id": "1a01b9fa405dee7d",
+            "mensaje": "Tu pago fue aprobado Pedido #1655409187695-01 Hola, Martin. Estamos preparando tu producto para realizar el envío. Tené en cuenta: Si seleccionaste retiro en tienda, por favor aguardá el mail de"
+          }
+        },
+        "pairedItem": {
+          "item": 5
+        }
+      },
+      {
+        "json": {
+          "id": "recLQtNIU80A8hVti",
+          "createdTime": "2026-08-20T00:40:11.000Z",
+          "fields": {
+            "thread_id": "1a01b923ead77246",
+            "estado": "Pendiente",
+            "correo_id": "1a01b923ead77246",
+            "mensaje": "Carrefour Logo ¡Hola, thelordofthejulio! Recibimos tu solicitud de ingreso con la clave de acceso rápido por mail. Ingresá este código para iniciar sesión y tené en cuenta que podrá ser utilizado sólo"
+          }
+        },
+        "pairedItem": {
+          "item": 6
+        }
+      },
+      {
+        "json": {
+          "id": "rec6IwmIFUNY6TYgs",
+          "createdTime": "2026-08-20T00:40:11.000Z",
+          "fields": {
+            "thread_id": "1a01b04d6501093a",
+            "estado": "Pendiente",
+            "correo_id": "1a01b04d6501093a",
+            "mensaje": "Labiales, blush y mucho glow en preventa exclusiva 🌟 ¡Sumate! Web Version Farmacity Nyx No te pierdas estas novedades Skyn Fortini hasta 35% OFF Aprovechá las promociones bancarias del día: Promociones"
+          }
+        },
+        "pairedItem": {
+          "item": 7
+        }
+      },
+      {
+        "json": {
+          "id": "recnMR5XwT8tvNn4f",
+          "createdTime": "2026-08-20T00:40:12.000Z",
+          "fields": {
+            "thread_id": "1a018cde24b15561",
+            "estado": "Pendiente",
+            "correo_id": "1a018cde24b15561",
+            "mensaje": "Academia.edu Julio enrique, El nombre “J. Rodriguez Angulo” fue mencionado en un artículo sobre Estado recientemente descubiertos por Academia. Mira el artículo que te menciona ▸ This is not me 580"
+          }
+        },
+        "pairedItem": {
+          "item": 8
+        }
+      },
+      {
+        "json": {
+          "id": "recuL58qAvXnKwwM2",
+          "createdTime": "2026-08-20T00:40:13.000Z",
+          "fields": {
+            "thread_id": "1a018b1fe1e8f101",
+            "estado": "Pendiente",
+            "correo_id": "1a018b1fe1e8f101",
+            "mensaje": "Hi Julio Enrique, Upgrade to keep using paid features Your 14-day trial of Airtable's Team plan has ended. We hope you got a chance to explore all paid features including more automation runs,"
+          }
+        },
+        "pairedItem": {
+          "item": 9
+        }
+      }
+    ]
+  },
+  "connections": {
+    "TRG_REVISION_CORREO": {
+      "main": [
+        [
+          {
+            "node": "GMAIL_OBTENER_CORREOS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GMAIL_OBTENER_CORREOS": {
+      "main": [
+        [
+          {
+            "node": "SET_DATOS_EMAIL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SET_DATOS_EMAIL": {
+      "main": [
+        [
+          {
+            "node": "FORMATEAR_FECHA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FORMATEAR_FECHA": {
+      "main": [
+        [
+          {
+            "node": "OPENAI_ANALIZAR_CORREO",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OPENAI_ANALIZAR_CORREO": {
+      "main": [
+        [
+          {
+            "node": "AIRTABLE_GUARDAR_INTERACCION",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AIRTABLE_GUARDAR_INTERACCION": {
+      "main": [
+        [
+          {
+            "node": "SOLICITAR_APROBACION_HUMANA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SOLICITAR_APROBACION_HUMANA": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "JolhmIwOtX32Rohy",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "333ade67-540d-4a47-aa3f-344c005db215",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f5fc03aa4ab757d3816b62a5437e2b2624b2317b50b324b43518b2612381eba7"
+  },
+  "nodeGroups": [],
+  "id": "gBFXur5PPKoyFCGe",
+  "tags": []
+}
