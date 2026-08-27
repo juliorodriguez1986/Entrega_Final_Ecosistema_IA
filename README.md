@@ -226,45 +226,25 @@ MARK A MESSAGE AS READ
 ```
 
 ---
+# Lógica del Flujo
 
-# Entregables Incluidos
+La lógica completa del sistema fue desarrollada en n8n.
 
-## Diagrama de Arquitectura
+El flujo incluye:
 
-```text
-/documentos
-```
+- Obtención automática de correos desde Gmail.
+- Normalización de datos.
+- Clasificación mediante OpenAI GPT-4o-mini.
+- Gestión de errores.
+- Registro en Airtable.
+- Human-in-the-Loop mediante aprobación humana.
+- Actualización de estados.
+- Prevención de reprocesamientos.
 
-## Manual Operativo de Datos
-
-```text
-/documentos
-```
-
-## Matriz de Costes y Selección de Modelo
-
-```text
-/documentos
-```
-
-## Seguridad y Resiliencia
+El archivo técnico exportado desde n8n se encuentra en:
 
 ```text
-/documentos
-```
-
-## Dashboard de Control
-
-```text
-/enlaces
-```
-
-## Workflow n8n
-
-```text
-/flujo de trabajo
-WF_ATENCION_CLIENTE_IA.json
-```
+workflow/WF_ATENCION_CLIENTE_IA.json
 
 ---
 
