@@ -1,0 +1,882 @@
+{
+  "name": "WF_ATENCION_CLIENTE_IA",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 1
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -688,
+        -176
+      ],
+      "id": "a652fd5e-628c-4e48-89de-761676290d38",
+      "name": "TRG_REVISION_CORREO"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": 10,
+        "filters": {
+          "q": "is:unread -subject:\"APROBACIÓN REQUERIDA\" ``"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -496,
+        -176
+      ],
+      "id": "43309295-c09a-41b9-9010-cce8e76ee833",
+      "name": "GMAIL_OBTENER_CORREOS",
+      "webhookId": "ea611997-6aac-47bb-8410-c3856ea52135",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "ckooGgslEXKJA7Ks",
+          "name": "Gmail account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4756e67c-f678-44d1-81ba-1a1d6f9bbe48",
+              "name": "correo_id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "a25834f8-8f96-4591-831c-897010dca7b3",
+              "name": "thread_id",
+              "value": "={{ $json.threadId}}",
+              "type": "string"
+            },
+            {
+              "id": "51249a57-5a42-45fc-89cd-0826233b5293",
+              "name": "mensaje",
+              "value": "={{ $json.snippet }}",
+              "type": "string"
+            },
+            {
+              "id": "92666610-5206-4ff7-b2a7-42d768c85932",
+              "name": "fecha",
+              "value": "={{ $('TRG_REVISION_CORREO').item.json['Readable date'] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -288,
+        -176
+      ],
+      "id": "79f8de31-1b74-49f7-9ce5-e683dc8d7805",
+      "name": "SET_DATOS_EMAIL"
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appOwIAfHolX1vPob",
+          "mode": "list",
+          "cachedResultName": "Atencion_Cliente_IA",
+          "cachedResultUrl": "https://airtable.com/appOwIAfHolX1vPob"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl3W8BP735wYojzr",
+          "mode": "list",
+          "cachedResultName": "Interacciones",
+          "cachedResultUrl": "https://airtable.com/appOwIAfHolX1vPob/tbl3W8BP735wYojzr"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "correo_id": "={{ $('SET_DATOS_EMAIL').item.json.correo_id }}",
+            "thread_id": "={{ $('SET_DATOS_EMAIL').item.json.thread_id }}",
+            "mensaje": "={{ $('GMAIL_OBTENER_CORREOS').item.json.Subject }}",
+            "estado": "Pendiente",
+            "categoria_ia": "={{\nJSON.parse(\n$json.output[0].content[0].text\n.replace('```json','')\n.replace('```','')\n).categoria_ia\n}}",
+            "prioridad_ia": "={{\nJSON.parse(\n$json.output[0].content[0].text\n.replace('```json','')\n.replace('```','')\n).prioridad_ia\n}}",
+            "respuesta_ia": "={{\nJSON.parse(\n$json.output[0].content[0].text\n.replace('```json','')\n.replace('```','')\n).respuesta_ia\n}}",
+            "fecha": "={{\nnew Date(\nNumber($('SET_DATOS_EMAIL').item.json.internalDate)\n).toISOString()\n}}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "correo_id",
+              "displayName": "correo_id",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "mensaje",
+              "displayName": "mensaje",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "thread_id",
+              "displayName": "thread_id",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "fecha",
+              "displayName": "fecha",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "estado",
+              "displayName": "estado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Pendiente",
+                  "value": "Pendiente"
+                },
+                {
+                  "name": "Procesado IA",
+                  "value": "Procesado IA"
+                },
+                {
+                  "name": "Aprobado Humado",
+                  "value": "Aprobado Humado"
+                },
+                {
+                  "name": "Respondido",
+                  "value": "Respondido"
+                },
+                {
+                  "name": "Error",
+                  "value": "Error"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "categoria_ia",
+              "displayName": "categoria_ia",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "prioridad_ia",
+              "displayName": "prioridad_ia",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "respuesta_ia",
+              "displayName": "respuesta_ia",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Logs_Errores",
+              "displayName": "Logs_Errores",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        528,
+        -48
+      ],
+      "id": "fdb3dba8-5f71-4d2b-a13a-b958ffd45308",
+      "name": "AIRTABLE_GUARDAR_INTERACCION",
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "A4FVREKakwO2TcWz",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "abd52a69-cf18-4010-9ecf-5cd55a3c3cb4",
+              "name": "fecha_formateada",
+              "value": "={{\nnew Date(\nNumber($('SET_DATOS_EMAIL').item.json.internalDate)\n).toLocaleString('es-AR',{\nday:'2-digit',\nmonth:'2-digit',\nyear:'numeric',\nhour:'2-digit',\nminute:'2-digit'\n})\n}}\n",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -112,
+        -176
+      ],
+      "id": "eb112fda-a7bf-484d-908e-a1164ae01e2a",
+      "name": "FORMATEAR_FECHA"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=Analiza el siguiente correo y devuélveme únicamente JSON válido.\n\nDebes clasificar:\n\n- categoria_ia\n- prioridad_ia\n- respuesta_ia\n\nCategorías posibles:\nConsulta\nIncidente\nProblema Técnico\nSolicitud\nReclamo\nFacturación\nRegalos\nSpam\nCompras\nSocial\nNotificaciones\nTecnologia\nForos\nPromociones\n\n\nPrioridades posibles:\nAlta\nMedia\nBaja\n\nFormato:\n\n{\n  \"categoria_ia\":\"\",\n  \"prioridad_ia\":\"\",\n  \"respuesta_ia\":\"\"\n}\nAsunto:\n{{ $('GMAIL_OBTENER_CORREOS').item.json.Subject }}\n\nCorreo:\n{{ $('GMAIL_OBTENER_CORREOS').item.json.snippet }}\n\nMensaje:\n{{ $('GMAIL_OBTENER_CORREOS').item.json.snippet }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        48,
+        -176
+      ],
+      "id": "0e8086c8-a3d7-4840-b5bd-3f6bafc1004f",
+      "name": "OPENAI_ANALIZAR_CORREO",
+      "credentials": {
+        "openAiApi": {
+          "id": "FfAlaLM9Zq9cDDuX",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "sendTo": "julio.rodriguez1@yahoo.com",
+        "subject": "=APROBACIÓN REQUERIDA - Atención Cliente IA",
+        "message": "=Solicitud de aprobación\n\nAsunto:\n{{ $('GMAIL_OBTENER_CORREOS').item.json.Subject }}\n\nFecha:\n{{ $('FORMATEAR_FECHA').item.json.fecha_formateada }}\n\nCategoría IA:\n{{ $('AIRTABLE_GUARDAR_INTERACCION').item.json.fields.categoria_ia }}\n\nPrioridad:\n{{ $('AIRTABLE_GUARDAR_INTERACCION').item.json.fields.prioridad_ia }}\n\nRespuesta propuesta:\n{{ $('AIRTABLE_GUARDAR_INTERACCION').item.json.fields.respuesta_ia }}\n\nEstado:\nPendiente de aprobación\n\nPor favor, revise la información antes de continuar con el proceso.",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        768,
+        -48
+      ],
+      "id": "defb89f7-8394-42f4-b043-97c32a890c6e",
+      "name": "SOLICITAR_APROBACION_HUMANA",
+      "webhookId": "1acc3fd9-faee-48ed-9204-8c1224c5f82f",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "ckooGgslEXKJA7Ks",
+          "name": "Gmail account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appOwIAfHolX1vPob",
+          "mode": "list",
+          "cachedResultName": "Atencion_Cliente_IA",
+          "cachedResultUrl": "https://airtable.com/appOwIAfHolX1vPob"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl3W8BP735wYojzr",
+          "mode": "list",
+          "cachedResultName": "Interacciones",
+          "cachedResultUrl": "https://airtable.com/appOwIAfHolX1vPob/tbl3W8BP735wYojzr"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "estado": "Aprobado",
+            "id": "={{ $('AIRTABLE_GUARDAR_INTERACCION').item.json.id }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "correo_id",
+              "displayName": "correo_id",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "mensaje",
+              "displayName": "mensaje",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "thread_id",
+              "displayName": "thread_id",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "fecha",
+              "displayName": "fecha",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "estado",
+              "displayName": "estado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Pendiente",
+                  "value": "Pendiente"
+                },
+                {
+                  "name": "Rechazado",
+                  "value": "Rechazado"
+                },
+                {
+                  "name": "Aprobado",
+                  "value": "Aprobado"
+                },
+                {
+                  "name": "Error",
+                  "value": "Error"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "categoria_ia",
+              "displayName": "categoria_ia",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "prioridad_ia",
+              "displayName": "prioridad_ia",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "respuesta_ia",
+              "displayName": "respuesta_ia",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Logs_Errores",
+              "displayName": "Logs_Errores",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        992,
+        -48
+      ],
+      "id": "b91fe539-ab41-446c-8f10-d48721ac8207",
+      "name": "Update record",
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "A4FVREKakwO2TcWz",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "markAsRead",
+        "messageId": "={{ $('GMAIL_OBTENER_CORREOS').item.json.id }}"
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1216,
+        -48
+      ],
+      "id": "6374038f-b109-43dc-8ded-4ff700ad967b",
+      "name": "Mark a message as read1",
+      "webhookId": "a65d49f7-41be-4688-9405-0b19680ff776",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "ckooGgslEXKJA7Ks",
+          "name": "Gmail account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "8a5108eb-14cf-4ea4-b418-5ee61a300568",
+              "leftValue": "={{ $json.output[0].content[0].text }}",
+              "rightValue": "=",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        336,
+        -192
+      ],
+      "id": "e617fff8-f7c0-41cf-af2e-13ef46d7b007",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appOwIAfHolX1vPob",
+          "mode": "list",
+          "cachedResultName": "Atencion_Cliente_IA",
+          "cachedResultUrl": "https://airtable.com/appOwIAfHolX1vPob"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl3W8BP735wYojzr",
+          "mode": "list",
+          "cachedResultName": "Interacciones",
+          "cachedResultUrl": "https://airtable.com/appOwIAfHolX1vPob/tbl3W8BP735wYojzr"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "correo_id": "={{ $('SET_DATOS_EMAIL').item.json.correo_id }}",
+            "thread_id": "={{ $('SET_DATOS_EMAIL').item.json.thread_id }}",
+            "mensaje": "={{ $('GMAIL_OBTENER_CORREOS').item.json.Subject }}",
+            "estado": "Error",
+            "categoria_ia": "={{\nJSON.parse(\n$json.output[0].content[0].text\n.replace('```json','')\n.replace('```','')\n).categoria_ia\n}}",
+            "prioridad_ia": "={{\nJSON.parse(\n$json.output[0].content[0].text\n.replace('```json','')\n.replace('```','')\n).prioridad_ia\n}}",
+            "respuesta_ia": "={{\nJSON.parse(\n$json.output[0].content[0].text\n.replace('```json','')\n.replace('```','')\n).respuesta_ia\n}}",
+            "fecha": "={{\nnew Date(\nNumber($('SET_DATOS_EMAIL').item.json.internalDate)\n).toISOString()\n}}",
+            "Logs_Errores": "Error al analizar correo con OpenAI"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "correo_id",
+              "displayName": "correo_id",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "mensaje",
+              "displayName": "mensaje",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "thread_id",
+              "displayName": "thread_id",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "fecha",
+              "displayName": "fecha",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "estado",
+              "displayName": "estado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Pendiente",
+                  "value": "Pendiente"
+                },
+                {
+                  "name": "Procesado IA",
+                  "value": "Procesado IA"
+                },
+                {
+                  "name": "Aprobado Humado",
+                  "value": "Aprobado Humado"
+                },
+                {
+                  "name": "Respondido",
+                  "value": "Respondido"
+                },
+                {
+                  "name": "Error",
+                  "value": "Error"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "categoria_ia",
+              "displayName": "categoria_ia",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "prioridad_ia",
+              "displayName": "prioridad_ia",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "respuesta_ia",
+              "displayName": "respuesta_ia",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Logs_Errores",
+              "displayName": "Logs_Errores",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        544,
+        -352
+      ],
+      "id": "257fc5f7-cd2d-4bb8-8209-df0d5efd702b",
+      "name": "AIRTABLE_GUARDAR_ERROR",
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "A4FVREKakwO2TcWz",
+          "name": "Airtable account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "TRG_REVISION_CORREO": {
+      "main": [
+        [
+          {
+            "node": "GMAIL_OBTENER_CORREOS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GMAIL_OBTENER_CORREOS": {
+      "main": [
+        [
+          {
+            "node": "SET_DATOS_EMAIL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SET_DATOS_EMAIL": {
+      "main": [
+        [
+          {
+            "node": "FORMATEAR_FECHA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FORMATEAR_FECHA": {
+      "main": [
+        [
+          {
+            "node": "OPENAI_ANALIZAR_CORREO",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OPENAI_ANALIZAR_CORREO": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AIRTABLE_GUARDAR_INTERACCION": {
+      "main": [
+        [
+          {
+            "node": "SOLICITAR_APROBACION_HUMANA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SOLICITAR_APROBACION_HUMANA": {
+      "main": [
+        [
+          {
+            "node": "Update record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update record": {
+      "main": [
+        [
+          {
+            "node": "Mark a message as read1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "AIRTABLE_GUARDAR_ERROR",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AIRTABLE_GUARDAR_INTERACCION",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "JolhmIwOtX32Rohy",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "cac4eeb5-8349-4591-94da-6e0f0f8b07c3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f5fc03aa4ab757d3816b62a5437e2b2624b2317b50b324b43518b2612381eba7"
+  },
+  "nodeGroups": [],
+  "id": "gBFXur5PPKoyFCGe",
+  "tags": []
+}
