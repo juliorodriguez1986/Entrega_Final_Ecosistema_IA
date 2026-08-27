@@ -243,10 +243,6 @@ El flujo incluye:
 
 El archivo técnico exportado desde n8n se encuentra en:
 
-```text
-workflow/WF_ATENCION_CLIENTE_IA.json
-
----
 
 # Autor
 
