@@ -1,331 +1,281 @@
-# Ecosistema IA Autónomo para Atención de Clientes
+# Ecosistema IA para Atención de Clientes
 
-## Descripción del Proyecto
+## Descripción General
 
-Sistema de automatización inteligente desarrollado con n8n, Gmail, OpenAI GPT-4o-mini y Airtable para la gestión, clasificación y seguimiento de correos electrónicos mediante Inteligencia Artificial.
+Este proyecto implementa un ecosistema de automatización inteligente utilizando n8n, OpenAI GPT-4o-mini, Gmail y Airtable para la gestión automatizada de correos electrónicos de atención al cliente.
 
-El proyecto implementa:
+La solución permite:
 
-- Automatización de recepción de correos.
-- Clasificación mediante IA.
-- Registro y seguimiento en Airtable.
-- Human-in-the-Loop (aprobación humana).
-- Gestión centralizada de errores.
-- Dashboard de monitoreo y control.
+- Obtener correos electrónicos desde Gmail.
+- Analizar el contenido mediante Inteligencia Artificial.
+- Clasificar automáticamente cada interacción.
+- Asignar una prioridad.
+- Generar una respuesta sugerida.
+- Registrar la información en Airtable.
+- Solicitar aprobación humana antes de ejecutar una acción crítica.
+- Registrar errores para garantizar trazabilidad y resiliencia.
 
 ---
 
-# Tecnologías Utilizadas
+# Objetivos del Proyecto
+
+- Automatizar el procesamiento inicial de correos electrónicos.
+- Reducir tareas manuales repetitivas.
+- Implementar Inteligencia Artificial en un flujo real de negocio.
+- Incorporar mecanismos Human-in-the-Loop.
+- Registrar errores e incidencias para auditoría y seguimiento.
+- Construir un Dashboard operativo para monitorear las interacciones procesadas.
+
+---
+
+# Arquitectura Tecnológica
+
+## Orquestación
 
 - n8n
-- Gmail
+
+## Inteligencia Artificial
+
 - OpenAI GPT-4o-mini
+
+## Fuente de Datos
+
+- Gmail
+
+## Base de Datos
+
 - Airtable
-- GitHub
-- Lucidchart
+
+## Human-in-the-Loop
+
+- Gmail Send and Wait for Response
 
 ---
 
-# Arquitectura del Sistema
-
-## Workflow Principal
-
-WF_ATENCION_CLIENTE_IA
+# Workflow Implementado
 
 ```text
 TRG_REVISION_CORREO
-↓
+        ↓
 GMAIL_OBTENER_CORREOS
-↓
-ESTABLECER_DATOS_CORREO_ELECTRONICO
-↓
+        ↓
+SET_DATOS_EMAIL
+        ↓
 FORMATEAR_FECHA
-↓
+        ↓
 OPENAI_ANALIZAR_CORREO
-↓
-INTERACCION_DE_AIRTABLE_GUARDAR
-↓
+        ↓
+IF (Validación)
+        ↓
+AIRTABLE_GUARDAR_INTERACCION
+        ↓
 SOLICITAR_APROBACION_HUMANA
-↓
-APPROVE / DECLINE
+        ↓
+UPDATE RECORD
+        ↓
+MARK A MESSAGE AS READ
 ```
-
-### Funciones
-
-- Recepción de correos desde Gmail.
-- Formateo y normalización de datos.
-- Clasificación mediante OpenAI.
-- Registro de información en Airtable.
-- Supervisión humana antes de continuar el proceso.
 
 ---
 
-## Workflow de Resiliencia
+# Gestión de Errores
 
-WF_ERROR_HANDLER
-
-```text
-ERROR_TRIGGER
-↓
-REGISTRAR_ERROR
-↓
-LOGS_ERRORES
-```
-
-### Funciones
-
-- Captura automática de errores.
-- Registro centralizado de incidencias.
-- Auditoría y trazabilidad.
-
----
-
-# Lógica del Flujo (n8n)
-
-La rúbrica solicita la entrega de la lógica del flujo en formato JSON.
-
-Los workflows implementados se encuentran en:
+El workflow incorpora una ruta de error específica para registrar incidencias durante el procesamiento.
 
 ```text
-workflow/
+OPENAI_ANALIZAR_CORREO
+        ↓
+IF
+        ↓
+AIRTABLE_GUARDAR_ERROR
 ```
 
-### Workflow Principal
-
-Archivo:
+Los errores se almacenan mediante el campo:
 
 ```text
-workflow/WF_ATENCION_CLIENTE_IA.json
+Logs_Errores
 ```
-
-Contiene:
-
-- Trigger de revisión de correo.
-- Integración Gmail.
-- Procesamiento OpenAI.
-- Escritura en Airtable.
-- Human-in-the-Loop.
-
----
-
-### Workflow de Gestión de Errores
-
-Archivo:
-
-```text
-workflow/WF_ERROR_HANDLER.json
-```
-
-Contiene:
-
-- Error Trigger.
-- Registro automático en Airtable.
-- Gestión centralizada de incidentes.
-
----
-
-## Importación de Workflows
-
-Para reutilizar los workflows:
-
-1. Abrir n8n.
-2. Seleccionar Import Workflow.
-3. Importar el archivo JSON correspondiente.
-4. Configurar las credenciales:
-   - Gmail
-   - OpenAI
-   - Airtable
-5. Activar los workflows.
 
 ---
 
 # Human-in-the-Loop
 
-Se implementó utilizando:
+Antes de completar el proceso, el workflow requiere una validación humana utilizando:
 
 ```text
 Send and Wait for Response
 ```
 
-Opciones:
-
-- Approve
-- Decline
-
-La ejecución permanece detenida hasta recibir una decisión humana.
-
-Objetivos:
-
-- Validación humana.
-- Reducción de errores.
-- Control operativo.
-
----
-
-# Gestión de Errores (Resiliencia)
-
-Workflow:
+Las decisiones posibles son:
 
 ```text
-WF_ERROR_HANDLER
+Aprobado
+Rechazado
 ```
 
-Configuración:
-
-```text
-Error Trigger
-↓
-Airtable
-↓
-Logs_Errores
-```
-
-Información registrada:
-
-- error_id
-- workflow
-- nodo_error
-- mensaje_error
-- fecha_error
-- estado_error
-- origen
+La respuesta actualiza automáticamente el estado del registro en Airtable.
 
 ---
 
 # Base de Datos
 
-Base:
+Tabla principal:
 
 ```text
-Atencion_Cliente_IA
+Interacciones
 ```
 
-## Tabla Interacciones
+Campos implementados:
 
-Campos principales:
-
-- correo_id
-- thread_id
-- mensaje
-- fecha
-- estado
-- categoria_ia
-- prioridad_ia
-- respuesta_ia
-
-## Tabla Logs_Errores
-
-Campos principales:
-
-- error_id
-- workflow
-- nodo_error
-- mensaje_error
-- fecha_error
-- estado_error
-- origen
+```text
+correo_id
+mensaje
+thread_id
+fecha
+estado
+categoria_ia
+prioridad_ia
+respuesta_ia
+Logs_Errores
+```
 
 ---
 
 # Dashboard de Control
 
-KPIs definidos:
+Se implementó un Dashboard utilizando Airtable Interfaces para visualización operativa interna.
 
-- Total Interacciones
-- Total Errores
-- Errores Abiertos
-- Pendientes
-- Tasa de Error
-
-Fórmula:
+La fuente de información es la tabla:
 
 ```text
-Tasa Error (%) =
-(Total Errores / Total Interacciones) * 100
+Interacciones
 ```
 
-## Limitación de Licencia
+Indicadores monitorizados:
 
-La licencia utilizada de Airtable no permite publicar la interfaz mediante la opción "Compartir en la Web".
+- Total de interacciones.
+- Estado de procesamiento.
+- Categorías generadas por IA.
+- Prioridades asignadas por IA.
+- Registros de errores.
+- Seguimiento temporal de interacciones.
 
-Por este motivo se incluyen:
+## Shared View Pública
 
-- Evidencias del dashboard.
-- Shared Views cuando estén disponibles.
-- Capturas de respaldo en el repositorio.
+Para cumplir el requisito de acceso público solicitado por la consigna, se publicó la siguiente Shared View de Airtable:
+
+**Dashboard_Control**
+
+[Acceder a Dashboard_Control](https://airtable.com/appOwIAfHolX1vPob/shrvna2fkQpMPl6KH)
 
 ---
 
-# Documentación Incluida
+# Limitación Documentada
 
-Carpeta:
+Durante la implementación se creó una Interface de Airtable denominada:
 
 ```text
-documentos/
+Tablero
 ```
 
-Contenido:
+Esta Interface contiene indicadores y gráficos construidos sobre la tabla Interacciones.
 
-- Arquitectura_Sistema.pdf
-- Manual_Operativo_Datos.pdf
-- Matriz_Costos.pdf
-- Seguridad_Resiliencia.pdf
-- Dashboard_Control.pdf
+Sin embargo, Airtable restringe la publicación pública de Interfaces para el tipo de licencia utilizado durante el desarrollo del proyecto.
+
+Por este motivo:
+
+- La Interface permanece disponible únicamente para uso interno.
+- No fue posible generar un enlace público de la Interface.
+- El requisito académico de acceso público se resolvió utilizando una Shared View de Airtable.
+- Esta limitación corresponde al plan de licencia utilizado y no a una limitación técnica del workflow desarrollado.
+
+Con fines de transparencia y documentación técnica, no se declara ninguna URL pública de la Interface porque dicha funcionalidad no se encuentra habilitada en la licencia disponible.
 
 ---
 
-# Evidencias
+# Optimización de Costes
 
-Carpeta:
+Modelo implementado:
 
 ```text
-evidencias/
+GPT-4o-mini
 ```
 
-Contenido:
+Funciones realizadas por el modelo:
 
-- flujo_n8n.png
-- human_in_the_loop.png
-- error_handler.png
-- error_logs.png
-- dashboard_kpi.png
+- Clasificación de correos.
+- Asignación de prioridad.
+- Generación de respuesta sugerida.
+
+La elección de GPT-4o-mini permite utilizar un único modelo para todo el flujo, reduciendo complejidad operativa y costes computacionales.
 
 ---
 
-# Estructura del Repositorio
+# Seguridad y Resiliencia
+
+La solución incorpora:
+
+- Registro de errores.
+- Human-in-the-Loop.
+- Validación previa a acciones críticas.
+- Trazabilidad mediante Airtable.
+- Prevención de reprocesamientos mediante:
+  
+```text
+MARK A MESSAGE AS READ
+```
+
+---
+
+# Entregables Incluidos
+
+## Diagrama de Arquitectura
 
 ```text
-Entrega_Final_Ecosistema_IA
-│
-├── documentos/
-│   ├── Arquitectura_Sistema.pdf
-│   ├── Manual_Operativo_Datos.pdf
-│   ├── Matriz_Costos.pdf
-│   ├── Seguridad_Resiliencia.pdf
-│   └── Dashboard_Control.pdf
-│
-├── workflow/
-│   ├── WF_ATENCION_CLIENTE_IA.json
-│   └── WF_ERROR_HANDLER.json
-│
-├── evidencias/
-│   ├── flujo_n8n.png
-│   ├── human_in_the_loop.png
-│   ├── error_handler.png
-│   ├── error_logs.png
-│   └── dashboard_kpi.png
-│
-├── enlaces/
-│   └── enlaces.md
-│
-└── README.md
+/documentos
+```
+
+## Manual Operativo de Datos
+
+```text
+/documentos
+```
+
+## Matriz de Costes y Selección de Modelo
+
+```text
+/documentos
+```
+
+## Seguridad y Resiliencia
+
+```text
+/documentos
+```
+
+## Dashboard de Control
+
+```text
+/enlaces
+```
+
+## Workflow n8n
+
+```text
+/flujo de trabajo
+WF_ATENCION_CLIENTE_IA.json
 ```
 
 ---
 
 # Autor
 
-Julio Enrique Rodríguez Angulo
+**Julio Enrique Rodríguez Angulo**
+
+Trabajo Final  
+Automatización e Inteligencia Artificial
+
+---
 
 Proyecto desarrollado para la entrega final:
 
